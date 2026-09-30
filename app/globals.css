@@ -70,4 +70,43 @@ body {
   animation-play-state: paused;
 }
 
+/* 3D Speakers Carousel Stage - responsive translation and perspective */
+.speakers-stage {
+  --card-offset: 155px;
+  perspective: 1200px;
+}
 
+@media (min-width: 640px) {
+  .speakers-stage {
+    --card-offset: 195px;
+    perspective: 1300px;
+  }
+}
+
+@media (min-width: 768px) {
+  .speakers-stage {
+    --card-offset: 240px;
+    perspective: 1450px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .speakers-stage {
+    --card-offset: 310px;
+    perspective: 1650px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .speakers-stage {
+    --card-offset: 370px;
+    perspective: 1850px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .speakers-stage {
+    --card-offset: 420px;
+    perspective: 2000px;
+  }
+}
