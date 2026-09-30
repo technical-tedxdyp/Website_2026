@@ -6,6 +6,8 @@ import React, { useState, useEffect } from 'react';
 import { useBooking } from '../context/BookingContext';
 import { Evening_Seesion, Full_Day_Session, Morning_Session } from '@/lib/const';
 
+const BOOKING_ENABLED = false;
+
 const TICKET_TIERS = [
     { id: Morning_Session, name: 'Morning Session', price: '₹79', numericPrice: 79 },
     { id: Evening_Seesion, name: 'Evening Session', price: '₹79', numericPrice: 79 },
@@ -55,6 +57,8 @@ export default function BookingDrawer() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!BOOKING_ENABLED) return;
+
         setError('');
         setSuccessMsg('');
 
@@ -212,8 +216,31 @@ export default function BookingDrawer() {
                     </button>
                 </div>
 
+                {!BOOKING_ENABLED && (
+                    <div className="px-6 pt-6 md:px-8" role="status">
+                        <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                            <div className="bg-black px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
+                                TICKET DESK / UPDATE
+                            </div>
+                            <div className="p-5">
+                                <div className="mb-4 flex h-10 w-10 items-center justify-center border-2 border-black bg-[#EB0028] text-white">
+                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth="2.5" d="M12 8v4m0 4h.01M10.3 3.9 1.8 18.6A1.6 1.6 0 0 0 3.2 21h17.6a1.6 1.6 0 0 0 1.4-2.4L13.7 3.9a1.9 1.9 0 0 0-3.4 0Z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-2xl font-black leading-tight text-black">
+                                    Booking opens tomorrow
+                                </h3>
+                                <p className="mt-3 text-sm leading-relaxed text-neutral-700">
+                                    Ticket bookings are closed for today. From tomorrow, book your ticket on this website or visit the ticketing canopies on campus.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Body Content */}
-                <form
+                {BOOKING_ENABLED && <form
                     onSubmit={handleSubmit}
                     className="flex-1 flex flex-col justify-between overflow-y-auto p-6 md:p-8 space-y-6"
                 >
@@ -245,8 +272,8 @@ export default function BookingDrawer() {
                                             key={tier.id}
                                             onClick={() => setSelectedTier(tier.name)}
                                             className={`w-full p-4 flex items-center justify-between border-2 border-black text-left transition-all cursor-pointer ${isSelected
-                                                    ? 'bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
-                                                    : 'bg-white text-black hover:bg-neutral-50'
+                                                ? 'bg-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+                                                : 'bg-white text-black hover:bg-neutral-50'
                                                 }`}
                                         >
                                             <span className="font-bold text-base md:text-lg">
@@ -338,7 +365,7 @@ export default function BookingDrawer() {
                             )}
                         </button>
                     </div>
-                </form>
+                </form>}
             </div>
         </>
     );
