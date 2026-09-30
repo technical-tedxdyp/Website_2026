@@ -29,10 +29,10 @@ export default function Home() {
                         <span className="text-brand text-2xl md:text-3xl tracking-[0.2em] font-pixel block my-2">In The</span>
                         Mosaic
                     </h1>
-                    <p className="font-pixel text-gray-400 mt-6 max-w-sm lowercase leading-relaxed">
+                    <p className="font-pixel text-gray-400 mt-6 max-w-sm md:max-w-xl lowercase leading-relaxed md:text-xl">
                         Diverse, fragmented ideas wander, collide, and lock together to form a larger picture.
                     </p>
-                    <div className="flex gap-8 mt-10 font-pixel text-sm text-brand uppercase">
+                    <div className="flex gap-8 mt-10 font-pixel text-sm md:text-lg text-brand uppercase">
                         <span>📅 6 Oct 2026</span>
                         <span>📍DYPAKURDI</span>
                     </div>
@@ -99,8 +99,8 @@ export default function Home() {
                                 <span className="font-pixel text-brand text-sm lg:text-base tracking-wider">01</span>
                                 <div className="h-[1px] bg-neutral-800 flex-1" />
                             </div>
-                            <h4 className="text-2xl lg:text-3xl font-bold mb-3 text-white tracking-tight">Fragment</h4>
-                            <p className="font-pixel text-gray-400 text-sm lg:text-base leading-relaxed">
+                            <h4 className="text-3xl lg:text-4xl font-bold mb-3 text-white tracking-tight">Fragment</h4>
+                            <p className="font-pixel text-gray-400 text-base lg:text-lg leading-relaxed">
                                 Ideas begin scattered — messy, personal, incomplete. We honour the fragments before the picture.
                             </p>
                         </div>
@@ -112,8 +112,8 @@ export default function Home() {
                                 <span className="font-pixel text-brand text-sm lg:text-base tracking-wider">02</span>
                                 <div className="h-[1px] bg-neutral-800 flex-1" />
                             </div>
-                            <h4 className="text-2xl lg:text-3xl font-bold mb-3 text-white tracking-tight">Wander</h4>
-                            <p className="font-pixel text-gray-400 text-sm lg:text-base leading-relaxed">
+                            <h4 className="text-3xl lg:text-4xl font-bold mb-3 text-white tracking-tight">Wander</h4>
+                            <p className="font-pixel text-gray-400 text-base lg:text-lg leading-relaxed">
                                 We meander between disciplines and perspectives, letting curiosity set the path.
                             </p>
                         </div>
@@ -125,8 +125,8 @@ export default function Home() {
                                 <span className="font-pixel text-brand text-sm lg:text-base tracking-wider">03</span>
                                 <div className="h-[1px] bg-neutral-800 flex-1" />
                             </div>
-                            <h4 className="text-2xl lg:text-3xl font-bold mb-3 text-white tracking-tight">Assemble</h4>
-                            <p className="font-pixel text-gray-400 text-sm lg:text-base leading-relaxed">
+                            <h4 className="text-3xl lg:text-4xl font-bold mb-3 text-white tracking-tight">Assemble</h4>
+                            <p className="font-pixel text-gray-400 text-base lg:text-lg leading-relaxed">
                                 Piece by piece, fragments lock together into something larger than any one voice.
                             </p>
                         </div>
