@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { useBooking } from '../context/BookingContext';
 import { Evening_Seesion, Full_Day_Session, Morning_Session } from '@/lib/const';
 
-const BOOKING_ENABLED = false;
+const BOOKING_ENABLED = (process.env.BOOKING_ENABLED || 'true') === 'true';
 
 const TICKET_TIERS = [
     { id: Morning_Session, name: 'Morning Session', price: '₹79', numericPrice: 79 },
