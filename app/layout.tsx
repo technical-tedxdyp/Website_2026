@@ -14,14 +14,56 @@ const vt323 = VT323({
 });
 
 export const metadata: Metadata = {
-  title: "TEDx DYPAKURDI - Mosaic",
-  description: "Every mind is a tile. Together they form the mosaic.",
-  icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/icon.png", type: "image/png" },
+  title: {
+    default: "TEDx DYP Akurdi | Mosaic",
+    template: "%s | TEDx DYP Akurdi",
+  },
+  description:
+    "TEDx DYP Akurdi brings together ideas, stories, and people to create meaningful connections. Discover speakers, sessions, tickets, and event updates.",
+  keywords: [
+    "TEDx DYP Akurdi",
+    "TEDX DY Patil Akurdi",
+    "TEDx DYP AKURDI",
+    "TEDx DYP Akurdi 2026",
+    "TEDx Pune",
+    "TEDx Akurdi",
+    "DYP Akurdi TEDx",
+    "TEDx event Pune",
+  ],
+  authors: [{ name: "TEDx DYP Akurdi" }],
+  creator: "TEDx DYP Akurdi",
+  publisher: "TEDx DYP Akurdi",
+  metadataBase: new URL("https://tedxdypakurdi.in"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "TEDx DYP Akurdi | Mosaic",
+    description:
+      "Every mind is a tile. Together they form the mosaic.",
+    url: "https://tedxdypakurdi.in",
+    siteName: "TEDx DYP Akurdi",
+    type: "website",
+    locale: "en_IN",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "TEDx DYP Akurdi - Mosaic",
+      },
     ],
-    apple: "/apple-icon.png",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TEDx DYP Akurdi | Mosaic",
+    description:
+      "Every mind is a tile. Together they form the mosaic.",
+    images: ["/og-image.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
