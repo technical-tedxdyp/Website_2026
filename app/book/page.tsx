@@ -1,19 +1,61 @@
-// app/book/page.tsx
 'use client';
 
 import { useState } from 'react';
 import Script from 'next/script';
 import { useRouter } from 'next/navigation';
+import PaymentRedirectLoader, { PaymentStep } from '../components/PaymentRedirectLoader';
+import { Morning_Session, Evening_Seesion, Full_Day_Session } from '@/lib/const';
+
+type PaymentResponse = {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+};
+
+type VerifyResponse = {
+    success?: boolean;
+    message?: string;
+};
+
+type CreateOrderResponse = {
+    message?: string;
+    data: {
+        amount: number;
+        currency: string;
+        orderId: string;
+        key: string;
+        bookingId: string;
+        paymentDisabled?: boolean;
+    };
+};
+
+type RazorpayOptions = {
+    key: string;
+    amount: number;
+    currency: string;
+    name: string;
+    order_id: string;
+    handler: (paymentResponse: PaymentResponse) => Promise<void>;
+    prefill: { name: string; email: string; contact: string };
+    theme: { color: string };
+};
+
+type RazorpayInstance = {
+    on: (event: string, handler: () => void) => void;
+    open: () => void;
+};
+
+type WindowWithRazorpay = Window & {
+    Razorpay?: new (options: RazorpayOptions) => RazorpayInstance;
+};
 
 export default function UserFriendlyBooking() {
     const router = useRouter();
 
-    // Hardcoded list of sessions matching your request
-    // IMPORTANT: Replace the 'id' values with the actual MongoDB _id strings from your database
     const availableSessions = [
-        { id: '64a7f9b8e1234567890abcde', title: 'Morning Session' },
-        { id: '64a7f9b8e1234567890abcdf', title: 'Evening Session' },
-        { id: '64a7f9b8e1234567890abcdg', title: 'Full Day' },
+        { id: Morning_Session, title: 'Morning Session' },
+        { id: Evening_Seesion, title: 'Evening Session' },
+        { id: Full_Day_Session, title: 'Full Day' },
     ];
 
     const [formData, setFormData] = useState({
@@ -21,14 +63,76 @@ export default function UserFriendlyBooking() {
         email: '',
         phone: '',
         ticketCount: 1,
-        sessionId: availableSessions[0].id, // Defaults to the Morning Session ID
+        sessionId: availableSessions[0].id,
     });
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
+    // Intermediate redirecting loader state
+    const [paymentProcessing, setPaymentProcessing] = useState<{
+        isOpen: boolean;
+        step: PaymentStep;
+        bookingId?: string;
+        errorMessage?: string;
+        lastPaymentResponse?: PaymentResponse;
+    }>({
+        isOpen: false,
+        step: 'verifying',
+    });
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const verifyAndRedirect = async (paymentResponse: PaymentResponse, currentBookingId: string) => {
+        setPaymentProcessing({
+            isOpen: true,
+            step: 'verifying',
+            bookingId: currentBookingId,
+            lastPaymentResponse: paymentResponse,
+        });
+
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+        try {
+            const verifyRes = await fetch(`${API_URL}/payment/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bookingId: currentBookingId,
+                    razorpayOrderId: paymentResponse.razorpay_order_id,
+                    razorpayPaymentId: paymentResponse.razorpay_payment_id,
+                    razorpaySignature: paymentResponse.razorpay_signature,
+                }),
+            });
+
+            const verifyData: VerifyResponse = await verifyRes.json().catch((): VerifyResponse => ({}));
+
+            if (verifyRes.ok && (verifyData.success !== false)) {
+                // Step 2: Generating ticket
+                setPaymentProcessing((prev) => ({ ...prev, step: 'generating' }));
+                await new Promise((resolve) => setTimeout(resolve, 800));
+
+                // Step 3: Redirecting
+                setPaymentProcessing((prev) => ({ ...prev, step: 'redirecting' }));
+                await new Promise((resolve) => setTimeout(resolve, 700));
+
+                router.push(`/success?bookingId=${currentBookingId}`);
+            } else {
+                setPaymentProcessing((prev) => ({
+                    ...prev,
+                    step: 'error',
+                    errorMessage: verifyData?.message || 'Payment verification could not be confirmed. Check your email for ticket status or try again.',
+                }));
+            }
+        } catch {
+            setPaymentProcessing((prev) => ({
+                ...prev,
+                step: 'error',
+                errorMessage: 'Connection timed out during verification. If money was deducted, your ticket is being processed and will be sent to your email.',
+            }));
+        }
     };
 
     const handleCreateOrder = async (e: React.FormEvent) => {
@@ -72,7 +176,7 @@ export default function UserFriendlyBooking() {
                 }),
             });
 
-            const response = await res.json();
+            const response: CreateOrderResponse = await res.json();
 
             if (!res.ok) throw new Error(response.message || 'Failed to create order');
 
@@ -90,45 +194,27 @@ export default function UserFriendlyBooking() {
                 currency: currency,
                 name: "TEDx Event",
                 order_id: orderId,
-                handler: async function (paymentResponse: any) {
-
-                    // 3. Verify Payment with your backend immediately after Razorpay succeeds
-                    try {
-                        const verifyRes = await fetch(`${API_URL}/payment/verify`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                bookingId: bookingId,
-                                razorpayOrderId: paymentResponse.razorpay_order_id,
-                                razorpayPaymentId: paymentResponse.razorpay_payment_id,
-                                razorpaySignature: paymentResponse.razorpay_signature,
-                            }),
-                        });
-
-                        const verifyData = await verifyRes.json();
-
-                        if (verifyRes.ok && verifyData.success) {
-                            // Redirect to success page on completion
-                            router.push(`/success?bookingId=${bookingId}`);
-                        } else {
-                            setError(verifyData.message || 'Payment verification failed.');
-                        }
-                    } catch (verifyErr) {
-                        setError('Server error during verification. Check your email for ticket status.');
-                    }
+                handler: async function (paymentResponse: PaymentResponse) {
+                    await verifyAndRedirect(paymentResponse, bookingId);
                 },
                 prefill: { name: formData.name, email: formData.email, contact: formData.phone },
                 theme: { color: "#eb0028" },
             };
 
-            const rzp = new (window as any).Razorpay(options);
+            const RazorpayCtor = (window as WindowWithRazorpay).Razorpay;
+            if (!RazorpayCtor) {
+                setError('The payment gateway is still loading. Please try again.');
+                return;
+            }
+
+            const rzp = new RazorpayCtor(options);
             rzp.on('payment.failed', function () {
                 setError('Payment failed or was cancelled.');
             });
             rzp.open();
 
-        } catch (err: any) {
-            setError(err.message || 'Error connecting to server.');
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Error connecting to server.');
         } finally {
             setLoading(false);
         }
@@ -206,6 +292,25 @@ export default function UserFriendlyBooking() {
                     </button>
                 </form>
             </div>
+
+            {/* Intermediate Processing / Redirecting Interface */}
+            <PaymentRedirectLoader
+                isOpen={paymentProcessing.isOpen}
+                step={paymentProcessing.step}
+                bookingId={paymentProcessing.bookingId}
+                errorMessage={paymentProcessing.errorMessage}
+                onRetry={() => {
+                    if (paymentProcessing.lastPaymentResponse && paymentProcessing.bookingId) {
+                        verifyAndRedirect(paymentProcessing.lastPaymentResponse, paymentProcessing.bookingId);
+                    }
+                }}
+                onClose={() => {
+                    setPaymentProcessing((prev) => ({ ...prev, isOpen: false }));
+                    if (paymentProcessing.bookingId) {
+                        router.push(`/success?bookingId=${paymentProcessing.bookingId}`);
+                    }
+                }}
+            />
         </div>
     );
 }

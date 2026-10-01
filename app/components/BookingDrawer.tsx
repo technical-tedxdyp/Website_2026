@@ -5,14 +5,56 @@ import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { useBooking } from '../context/BookingContext';
 import { Evening_Seesion, Full_Day_Session, Morning_Session } from '@/lib/const';
-
-const BOOKING_ENABLED = (process.env.BOOKING_ENABLED || 'true') === 'true';
+import PaymentRedirectLoader, { PaymentStep } from './PaymentRedirectLoader';
 
 const TICKET_TIERS = [
     { id: Morning_Session, name: 'Morning Session', price: '₹79', numericPrice: 79 },
     { id: Evening_Seesion, name: 'Evening Session', price: '₹79', numericPrice: 79 },
     { id: Full_Day_Session, name: 'Full Day', price: '₹99', numericPrice: 99 },
 ];
+
+type PaymentResponse = {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+};
+
+type VerifyResponse = {
+    success?: boolean;
+    message?: string;
+};
+
+type CreateOrderResponse = {
+    message?: string;
+    data: {
+        amount: number;
+        currency?: string;
+        orderId?: string;
+        key?: string;
+        bookingId: string;
+    };
+};
+
+type RazorpayOptions = {
+    key: string;
+    amount: number;
+    currency: string;
+    name: string;
+    description: string;
+    order_id: string;
+    handler: (paymentResponse: PaymentResponse) => Promise<void>;
+    prefill: { name: string; email: string; contact: string };
+    theme: { color: string };
+};
+
+type RazorpayInstance = {
+    on: (event: string, handler: () => void) => void;
+    open: () => void;
+};
+
+type WindowWithRazorpay = Window & {
+    Razorpay?: new (options: RazorpayOptions) => RazorpayInstance;
+};
 
 export default function BookingDrawer() {
     const router = useRouter();
@@ -28,9 +70,21 @@ export default function BookingDrawer() {
     const [error, setError] = useState('');
     const [successMsg, setSuccessMsg] = useState('');
 
-    // Lock body scroll when drawer is open
+    // Post-payment redirect loader state
+    const [paymentProcessing, setPaymentProcessing] = useState<{
+        isOpen: boolean;
+        step: PaymentStep;
+        bookingId?: string;
+        errorMessage?: string;
+        lastPaymentResponse?: PaymentResponse;
+    }>({
+        isOpen: false,
+        step: 'verifying',
+    });
+
+    // Lock body scroll when drawer or payment processing modal is open
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen || paymentProcessing.isOpen) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = 'unset';
@@ -38,27 +92,76 @@ export default function BookingDrawer() {
         return () => {
             document.body.style.overflow = 'unset';
         };
-    }, [isOpen]);
+    }, [isOpen, paymentProcessing.isOpen]);
 
-    // Handle ESC key press
+    // Handle ESC key press (disable if payment is in progress)
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape' && isOpen) {
+            if (e.key === 'Escape' && isOpen && !paymentProcessing.isOpen) {
                 closeBooking();
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, closeBooking]);
+    }, [isOpen, paymentProcessing.isOpen, closeBooking]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const verifyAndRedirect = async (paymentResponse: PaymentResponse, currentBookingId: string) => {
+        setPaymentProcessing({
+            isOpen: true,
+            step: 'verifying',
+            bookingId: currentBookingId,
+            lastPaymentResponse: paymentResponse,
+        });
+
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+        try {
+            const verifyRes = await fetch(`${API_URL}/payment/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bookingId: currentBookingId,
+                    razorpayOrderId: paymentResponse.razorpay_order_id,
+                    razorpayPaymentId: paymentResponse.razorpay_payment_id,
+                    razorpaySignature: paymentResponse.razorpay_signature,
+                }),
+            });
+
+            const verifyData: VerifyResponse = await verifyRes.json().catch((): VerifyResponse => ({}));
+
+            if (verifyRes.ok && (verifyData.success !== false)) {
+                // Step 2: Generating Ticket & Sending Email
+                setPaymentProcessing((prev) => ({ ...prev, step: 'generating' }));
+                await new Promise((resolve) => setTimeout(resolve, 800));
+
+                // Step 3: Redirecting
+                setPaymentProcessing((prev) => ({ ...prev, step: 'redirecting' }));
+                await new Promise((resolve) => setTimeout(resolve, 700));
+
+                closeBooking();
+                router.push(`/success?bookingId=${currentBookingId}`);
+            } else {
+                setPaymentProcessing((prev) => ({
+                    ...prev,
+                    step: 'error',
+                    errorMessage: verifyData?.message || 'Payment verification could not be confirmed. Please check your email for ticket status or try again.',
+                }));
+            }
+        } catch {
+            setPaymentProcessing((prev) => ({
+                ...prev,
+                step: 'error',
+                errorMessage: 'Connection timed out during verification. If money was deducted, your ticket is being generated and will be sent to your email.',
+            }));
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!BOOKING_ENABLED) return;
-
         setError('');
         setSuccessMsg('');
 
@@ -101,10 +204,11 @@ export default function BookingDrawer() {
             }).catch(() => null);
 
             if (res && res.ok) {
-                const response = await res.json();
+                const response: CreateOrderResponse = await res.json();
                 const { amount, currency, orderId, key, bookingId } = response.data;
 
-                if (typeof window !== 'undefined' && (window as any).Razorpay && key) {
+                const RazorpayCtor = (window as WindowWithRazorpay).Razorpay;
+                if (RazorpayCtor && key && orderId) {
                     const options = {
                         key: key,
                         amount: amount,
@@ -112,29 +216,9 @@ export default function BookingDrawer() {
                         name: 'TEDx DYPAKURDI',
                         description: `${selectedTier} Ticket`,
                         order_id: orderId,
-                        handler: async function (paymentResponse: any) {
-                            try {
-                                const verifyRes = await fetch(`${API_URL}/payment/verify`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        bookingId: bookingId,
-                                        razorpayOrderId: paymentResponse.razorpay_order_id,
-                                        razorpayPaymentId: paymentResponse.razorpay_payment_id,
-                                        razorpaySignature: paymentResponse.razorpay_signature,
-                                    }),
-                                });
-
-                                const verifyData = await verifyRes.json();
-                                if (verifyRes.ok && verifyData.success) {
-                                    closeBooking();
-                                    router.push(`/success?bookingId=${bookingId}`);
-                                } else {
-                                    setError(verifyData.message || 'Payment verification failed.');
-                                }
-                            } catch {
-                                setError('Server error during payment verification.');
-                            }
+                        handler: async function (paymentResponse: PaymentResponse) {
+                            // Trigger loading redirect interface right after Razorpay completes
+                            await verifyAndRedirect(paymentResponse, bookingId);
                         },
                         prefill: {
                             name: formData.name,
@@ -144,7 +228,7 @@ export default function BookingDrawer() {
                         theme: { color: '#EB0028' },
                     };
 
-                    const rzp = new (window as any).Razorpay(options);
+                    const rzp = new RazorpayCtor(options);
                     rzp.on('payment.failed', function () {
                         setError('Payment cancelled or failed.');
                     });
@@ -160,8 +244,8 @@ export default function BookingDrawer() {
                 setLoading(false);
             }, 700);
 
-        } catch (err: any) {
-            setError(err?.message || 'Unable to process booking right now. Please try again.');
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'Unable to process booking right now. Please try again.');
             setLoading(false);
         }
     };
@@ -180,7 +264,7 @@ export default function BookingDrawer() {
 
             {/* Slide-over Drawer Panel */}
             <div
-                className={`fixed top-0 right-0 h-full w-full max-w-[420px] md:max-w-[450px] bg-[#EDEBE8] z-50 shadow-2xl flex flex-col border-l-2 border-black transition-transform duration-300 ease-in-out font-sans ${isOpen ? 'translate-x-0' : 'translate-x-full'
+                className={`fixed top-0 right-0 h-full w-full max-w-105 md:max-w-112.5 bg-[#EDEBE8] z-50 shadow-2xl flex flex-col border-l-2 border-black transition-transform duration-300 ease-in-out font-sans ${isOpen ? 'translate-x-0' : 'translate-x-full'
                     }`}
             >
                 {/* Red Header Bar */}
@@ -216,31 +300,8 @@ export default function BookingDrawer() {
                     </button>
                 </div>
 
-                {!BOOKING_ENABLED && (
-                    <div className="px-6 pt-6 md:px-8" role="status">
-                        <div className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                            <div className="bg-black px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
-                                TICKET DESK / UPDATE
-                            </div>
-                            <div className="p-5">
-                                <div className="mb-4 flex h-10 w-10 items-center justify-center border-2 border-black bg-[#EB0028] text-white">
-                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth="2.5" d="M12 8v4m0 4h.01M10.3 3.9 1.8 18.6A1.6 1.6 0 0 0 3.2 21h17.6a1.6 1.6 0 0 0 1.4-2.4L13.7 3.9a1.9 1.9 0 0 0-3.4 0Z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-2xl font-black leading-tight text-black">
-                                    Booking opens tomorrow
-                                </h3>
-                                <p className="mt-3 text-sm leading-relaxed text-neutral-700">
-                                    Ticket bookings are closed for today. From tomorrow, book your ticket on this website or visit the ticketing canopies on campus.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
                 {/* Body Content */}
-                {BOOKING_ENABLED && <form
+                <form
                     onSubmit={handleSubmit}
                     className="flex-1 flex flex-col justify-between overflow-y-auto p-6 md:p-8 space-y-6"
                 >
@@ -365,8 +426,28 @@ export default function BookingDrawer() {
                             )}
                         </button>
                     </div>
-                </form>}
+                </form>
             </div>
+
+            {/* Intermediate Processing / Redirecting Interface */}
+            <PaymentRedirectLoader
+                isOpen={paymentProcessing.isOpen}
+                step={paymentProcessing.step}
+                bookingId={paymentProcessing.bookingId}
+                errorMessage={paymentProcessing.errorMessage}
+                onRetry={() => {
+                    if (paymentProcessing.lastPaymentResponse && paymentProcessing.bookingId) {
+                        verifyAndRedirect(paymentProcessing.lastPaymentResponse, paymentProcessing.bookingId);
+                    }
+                }}
+                onClose={() => {
+                    setPaymentProcessing((prev) => ({ ...prev, isOpen: false }));
+                    closeBooking();
+                    if (paymentProcessing.bookingId) {
+                        router.push(`/success?bookingId=${paymentProcessing.bookingId}`);
+                    }
+                }}
+            />
         </>
     );
 }
