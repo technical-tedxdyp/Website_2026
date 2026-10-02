@@ -6,9 +6,9 @@ const SPEAKERS = [
     { name: 'Dr.Anuj Pachhel', role: 'YouTuber / Doctor', talk: 'Talk title to be announced', image: '/speakers/Anuj_Pachhel.svg' },
     { name: 'Mrs.Apurva Nemlekar', role: 'Actress', talk: 'Talk title to be announced', image: '/speakers/Apurva_Nemlekar_New.svg' },
     { name: 'Mr.Dinakar Nagalla', role: 'Entrepreneur', talk: 'Talk title to be announced', image: '/speakers/Dinakar_Nagalla.svg' },
-    { name: 'Dr. Ajit Kembhavi', role: 'Astrophysicist', talk: 'Talk title to be announced', image: '/speakers/Dr_Ajit_Kembhavi.svg' },
-    { name: 'Mrs.Sonali Sonawane', role: 'Singer', talk: 'Talk title to be announced', image: '/speakers/Sonali_Sonawane.svg' },
-    { name: 'Mr.Adil Nargolwala (Iron Man)', role: 'Indusrtialist', talk: 'Talk title to be announced', image: '/speakers/Adil_Nargolwala.svg' },
+    { name: 'Prof. Ajit Kembhavi', role: 'Astrophysicist', talk: 'Talk title to be announced', image: '/speakers/Dr_Ajit_Kembhavi.svg' },
+    { name: 'Ms.Sonali Sonawane', role: 'Singer', talk: 'Talk title to be announced', image: '/speakers/Sonali_Sonawane.svg' },
+    { name: 'Mr.Adil Nargolwala', role: 'HR Leader & Endurance Athlete', talk: 'Talk title to be announced', image: '/speakers/Adil_Nargolwala.svg' },
 ];
 
 export default function SpeakersCarousel() {
