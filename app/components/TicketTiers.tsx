@@ -26,7 +26,7 @@ const TIERS = [
         note: 'Limited quantity',
         featured: false,
         cta: 'Select Evening',
-        speakers: ['Dinakara Nagalla', 'Anuj Pachhel', 'Sonali Sonawane', 'Band Performance'],
+        speakers: ['Mr.Dinakara Nagalla', 'Ms.Sonali Sonawane', 'Band Performance'],
 
     },
 ];
