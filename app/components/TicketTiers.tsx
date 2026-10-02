@@ -10,7 +10,7 @@ const TIERS = [
         note: 'Limited quantity',
         featured: false,
         cta: 'Select Morning',
-        speakers: ['Adil Nargolwala', 'Ajit Kembhavi', 'Apurva Nemlekar'],
+        speakers: ['Adil Nargolwala', 'Ajit Kembhavi', 'Apurva Nemlekar','Anuj Pachhel'],
     },
     {
         name: 'Full Day',
@@ -26,7 +26,7 @@ const TIERS = [
         note: 'Limited quantity',
         featured: false,
         cta: 'Select Evening',
-        speakers: ['Dinakara Nagalla', 'Anuj Pachhel', 'Sonali Sonawane', 'Band Performance'],
+        speakers: ['Dinakara Nagalla',  'Sonali Sonawane', 'Band Performance'],
 
     },
 ];
