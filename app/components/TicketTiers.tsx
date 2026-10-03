@@ -10,7 +10,7 @@ const TIERS = [
         note: 'Limited quantity',
         featured: false,
         cta: 'Select Morning',
-        speakers: ['Dr.Anuj Pachhel','Mr.Adil Nargolwala', 'Proj.Ajit Kembhavi', 'Mrs.Apurva Nemlekar'],
+        speakers: ['Mr.Adil Nargolwala','Dr.Anuj Pachhel', 'Mrs.Apurva Nemlekar','Dance Performance'],
     },
     {
         name: 'Full Day',
@@ -26,7 +26,7 @@ const TIERS = [
         note: 'Limited quantity',
         featured: false,
         cta: 'Select Evening',
-        speakers: ['Mr.Dinakara Nagalla', 'Ms.Sonali Sonawane', 'Band Performance'],
+        speakers: ['Vihang Kala Mandal','Mr.Dinakara Nagalla', 'Ms.Sonali Sonawane', 'Prof.Ajit Kembhavi', 'Band Performance'],
 
     },
 ];
