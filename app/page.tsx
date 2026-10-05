@@ -29,10 +29,10 @@ export default function Home() {
                         <span className="text-brand text-2xl md:text-3xl tracking-[0.2em] font-pixel block my-2">In The</span>
                         Mosaic
                     </h1>
-                    <p className="font-pixel text-gray-400 mt-6 max-w-sm lowercase leading-relaxed">
+                    <p className="font-pixel text-gray-400 mt-6 max-w-sm md:max-w-xl lowercase leading-relaxed md:text-xl">
                         Diverse, fragmented ideas wander, collide, and lock together to form a larger picture.
                     </p>
-                    <div className="flex gap-8 mt-10 font-pixel text-sm text-brand uppercase">
+                    <div className="flex gap-8 mt-10 font-pixel text-sm md:text-lg text-brand uppercase">
                         <span>📅 6 Oct 2026</span>
                         <span>📍DYPAKURDI</span>
                     </div>
@@ -44,17 +44,18 @@ export default function Home() {
             {/* The Theme Section */}
             <section id="theme" className="bg-black text-white px-6 md:px-24 py-24 border-b-2 border-neutral-900 overflow-hidden">
                 <Reveal>
-                    <h3 className="font-pixel text-brand uppercase tracking-[0.3em] mb-8">The Theme</h3>
-                    <h2 className="text-5xl md:text-7xl font-black uppercase leading-[1.1] max-w-4xl tracking-tighter">
-                        Every mind is a tile<br />
+                    <h3 className="md:hidden font-pixel text-brand uppercase tracking-[0.3em] mb-8">The Theme</h3>
+                    <h2 className="text-4xl md:text-6xl font-black uppercase leading-[1.1] max-w-4xl tracking-tighter">
+                        Every mind is a tile.<br />
                         Together they form the <br />
                         <span className="text-brand">Mosaic.</span>
                     </h2>
                 </Reveal>
 
-                <div className="mt-32 max-w-3xl space-y-24">
+                {/* Mobile View */}
+                <div className="md:hidden mt-32 max-w-3xl space-y-24">
                     <Reveal delay={100}>
-                        <div className="flex flex-col md:flex-row gap-6 md:gap-16">
+                        <div className="flex flex-col gap-6">
                             <div className="font-pixel text-brand">01</div>
                             <div className="border-t border-neutral-800 pt-4 flex-1">
                                 <h4 className="text-3xl font-bold mb-4">Fragment</h4>
@@ -66,7 +67,7 @@ export default function Home() {
                     </Reveal>
 
                     <Reveal delay={200}>
-                        <div className="flex flex-col md:flex-row gap-6 md:gap-16 md:ml-32">
+                        <div className="flex flex-col gap-6">
                             <div className="font-pixel text-brand">02</div>
                             <div className="border-t border-neutral-800 pt-4 flex-1">
                                 <h4 className="text-3xl font-bold mb-4">Wander</h4>
@@ -78,7 +79,7 @@ export default function Home() {
                     </Reveal>
 
                     <Reveal delay={300}>
-                        <div className="flex flex-col md:flex-row gap-6 md:gap-16 md:ml-64">
+                        <div className="flex flex-col gap-6">
                             <div className="font-pixel text-brand">03</div>
                             <div className="border-t border-neutral-800 pt-4 flex-1">
                                 <h4 className="text-3xl font-bold mb-4">Assemble</h4>
@@ -86,6 +87,48 @@ export default function Home() {
                                     Piece by piece, fragments lock together into something larger than any one voice.
                                 </p>
                             </div>
+                        </div>
+                    </Reveal>
+                </div>
+
+                {/* Desktop View (Staircase Stepped Mosaic Layout) */}
+                <div className="hidden md:flex flex-col mt-20 lg:mt-24 space-y-16 w-full max-w-6xl mx-auto">
+                    <Reveal delay={100}>
+                        <div className="w-full max-w-lg">
+                            <div className="flex items-center gap-4 mb-4">
+                                <span className="font-pixel text-brand text-sm lg:text-base tracking-wider">01</span>
+                                <div className="h-[1px] bg-neutral-800 flex-1" />
+                            </div>
+                            <h4 className="text-3xl lg:text-4xl font-bold mb-3 text-white tracking-tight">Fragment</h4>
+                            <p className="font-pixel text-gray-400 text-base lg:text-lg leading-relaxed">
+                                Ideas begin scattered — messy, personal, incomplete. We honour the fragments before the picture.
+                            </p>
+                        </div>
+                    </Reveal>
+
+                    <Reveal delay={200}>
+                        <div className="w-full max-w-lg mx-auto">
+                            <div className="flex items-center gap-4 mb-4">
+                                <span className="font-pixel text-brand text-sm lg:text-base tracking-wider">02</span>
+                                <div className="h-[1px] bg-neutral-800 flex-1" />
+                            </div>
+                            <h4 className="text-3xl lg:text-4xl font-bold mb-3 text-white tracking-tight">Wander</h4>
+                            <p className="font-pixel text-gray-400 text-base lg:text-lg leading-relaxed">
+                                We meander between disciplines and perspectives, letting curiosity set the path.
+                            </p>
+                        </div>
+                    </Reveal>
+
+                    <Reveal delay={300}>
+                        <div className="w-full max-w-lg ml-auto">
+                            <div className="flex items-center gap-4 mb-4">
+                                <span className="font-pixel text-brand text-sm lg:text-base tracking-wider">03</span>
+                                <div className="h-[1px] bg-neutral-800 flex-1" />
+                            </div>
+                            <h4 className="text-3xl lg:text-4xl font-bold mb-3 text-white tracking-tight">Assemble</h4>
+                            <p className="font-pixel text-gray-400 text-base lg:text-lg leading-relaxed">
+                                Piece by piece, fragments lock together into something larger than any one voice.
+                            </p>
                         </div>
                     </Reveal>
                 </div>

@@ -6,9 +6,9 @@ const SPEAKERS = [
     { name: 'Dr.Anuj Pachhel', role: 'YouTuber / Doctor', talk: 'Talk title to be announced', image: '/speakers/Anuj_Pachhel.svg' },
     { name: 'Mrs.Apurva Nemlekar', role: 'Actress', talk: 'Talk title to be announced', image: '/speakers/Apurva_Nemlekar_New.svg' },
     { name: 'Mr.Dinakar Nagalla', role: 'Entrepreneur', talk: 'Talk title to be announced', image: '/speakers/Dinakar_Nagalla.svg' },
-    { name: 'Dr. Ajit Kembhavi', role: 'Astrophysicist', talk: 'Talk title to be announced', image: '/speakers/Dr_Ajit_Kembhavi.svg' },
-    { name: 'Mrs.Sonali Sonawane', role: 'Singer', talk: 'Talk title to be announced', image: '/speakers/Sonali_Sonawane.svg' },
-    { name: 'Mr.Adil Nargolwala', role: 'Indusrtialist', talk: 'Talk title to be announced', image: '/speakers/Adil_Nargolwala.svg' },
+    { name: 'Prof. Ajit Kembhavi', role: 'Astrophysicist', talk: 'Talk title to be announced', image: '/speakers/Dr_Ajit_Kembhavi.svg' },
+    { name: 'Ms.Sonali Sonawane', role: 'Singer', talk: 'Talk title to be announced', image: '/speakers/Sonali_Sonawane.svg' },
+    { name: 'Mr.Adil Nargolwala', role: 'HR Leader & Endurance Athlete', talk: 'Talk title to be announced', image: '/speakers/Adil_Nargolwala.svg' },
 ];
 
 export default function SpeakersCarousel() {
@@ -52,14 +52,14 @@ export default function SpeakersCarousel() {
             tabIndex={0}
             aria-label="Speakers Carousel Section. Use left and right arrow keys to navigate."
         >
-            <div className="max-w-5xl mx-auto text-center mb-8 md:mb-12 lg:mb-16">
+            <div className="max-w-4xl mx-auto text-center mb-8 md:mb-12 lg:mb-16">
                 <p className="font-pixel text-brand uppercase tracking-[0.3em] mb-2 md:mb-3 text-xs md:text-sm">Voices of the Mosaic</p>
-                <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tighter">
+                <h2 className="text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-tighter">
                     Featured <span className="text-brand">Speakers</span>
                 </h2>
             </div>
 
-            <div className="speakers-stage relative h-[420px] sm:h-[480px] md:h-[560px] lg:h-[660px] xl:h-[740px] 2xl:h-[800px] flex items-center justify-center">
+            <div className="speakers-stage relative h-[420px] sm:h-[480px] md:h-[500px] lg:h-[560px] xl:h-[600px] 2xl:h-[640px] flex items-center justify-center">
                 {SPEAKERS.map((speaker, i) => {
                     let offset = i - active;
                     if (offset < -2) offset += SPEAKERS.length;
@@ -74,7 +74,7 @@ export default function SpeakersCarousel() {
                             key={i}
                             type="button"
                             onClick={() => setActive(i)}
-                            className="group absolute top-1/2 left-1/2 w-[150px] sm:w-[180px] md:w-[220px] lg:w-[290px] xl:w-[340px] 2xl:w-[380px] text-left cursor-pointer focus:outline-none"
+                            className="group absolute top-1/2 left-1/2 w-[150px] sm:w-[180px] md:w-[200px] lg:w-[240px] xl:w-[280px] 2xl:w-[300px] text-left cursor-pointer focus:outline-none"
                             style={{
                                 transform: `translate(-50%, -50%) translateX(calc(${offset} * var(--card-offset, 155px))) rotateY(${offset * -18}deg) scale(${isCenter ? 1.15 : 0.92 - abs * 0.04})`,
                                 zIndex: 20 - abs,
@@ -85,20 +85,18 @@ export default function SpeakersCarousel() {
                             aria-label={`${speaker.name} ${i + 1}`}
                         >
                             <div
-                                className={`bg-white overflow-hidden transition-all duration-500 ${
-                                    isCenter
-                                        ? 'border-[4px] lg:border-[6px] border-brand shadow-[8px_12px_0_0_rgba(0,0,0,0.08)] lg:shadow-[16px_24px_0_0_rgba(0,0,0,0.12)]'
-                                        : 'border border-black/10 hover:border-black/30'
-                                }`}
+                                className={`bg-white overflow-hidden transition-all duration-500 ${isCenter
+                                    ? 'border-[4px] lg:border-[6px] border-brand shadow-[8px_12px_0_0_rgba(0,0,0,0.08)] lg:shadow-[12px_16px_0_0_rgba(0,0,0,0.12)]'
+                                    : 'border border-black/10 hover:border-black/30'
+                                    }`}
                             >
-                                <div className="relative h-[220px] sm:h-[260px] md:h-[320px] lg:h-[390px] xl:h-[450px] 2xl:h-[500px] bg-neutral-200 overflow-hidden">
+                                <div className="relative h-[220px] sm:h-[260px] md:h-[290px] lg:h-[340px] xl:h-[380px] 2xl:h-[400px] bg-neutral-200 overflow-hidden">
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={speaker.image}
                                         alt={speaker.name}
-                                        className={`absolute inset-0 h-full w-full object-cover transition-[filter,transform] duration-500 ease-out ${
-                                            isCenter ? 'grayscale-0' : 'grayscale group-hover:grayscale-0'
-                                        }`}
+                                        className={`absolute inset-0 h-full w-full object-cover transition-[filter,transform] duration-500 ease-out ${isCenter ? 'grayscale-0' : 'grayscale group-hover:grayscale-0'
+                                            }`}
                                     />
                                 </div>
                                 <div className="p-3 sm:p-3.5 md:p-4 lg:p-5 xl:p-6">
@@ -136,9 +134,8 @@ export default function SpeakersCarousel() {
                                 key={i}
                                 type="button"
                                 onClick={() => setActive(i)}
-                                className={`h-1.5 md:h-2 lg:h-2.5 transition-all cursor-pointer ${
-                                    i === active ? 'w-8 md:w-12 lg:w-16 bg-brand' : 'w-1.5 md:w-2 lg:w-2.5 bg-black/30 hover:bg-black/60'
-                                }`}
+                                className={`h-1.5 md:h-2 lg:h-2.5 transition-all cursor-pointer ${i === active ? 'w-8 md:w-12 lg:w-16 bg-brand' : 'w-1.5 md:w-2 lg:w-2.5 bg-black/30 hover:bg-black/60'
+                                    }`}
                                 aria-label={`Go to speaker ${i + 1}`}
                             />
                         ))}
