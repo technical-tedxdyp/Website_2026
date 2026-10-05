@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 import PaymentRedirectLoader, { PaymentStep } from '../components/PaymentRedirectLoader';
+import BookingUnavailableNotice from '../components/BookingUnavailableNotice';
 import { Morning_Session, Evening_Seesion, Full_Day_Session } from '@/lib/const';
 
 type PaymentResponse = {
@@ -51,6 +52,7 @@ type WindowWithRazorpay = Window & {
 
 export default function UserFriendlyBooking() {
     const router = useRouter();
+    const bookingEnabled = process.env.BOOKING_ENABLED !== 'false';
 
     const availableSessions = [
         { id: Morning_Session, title: 'Morning Session' },
@@ -222,16 +224,20 @@ export default function UserFriendlyBooking() {
 
     return (
         <div className="min-h-screen bg-black text-white py-12 px-4 font-sans">
-            <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+            {bookingEnabled && <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />}
 
             <div className="max-w-xl mx-auto">
-                <div className="mb-10">
-                    <h1 className="text-4xl font-black tracking-tighter mb-2">
-                        Secure Your <span className="text-[#eb0028]">Seat</span>
-                    </h1>
-                </div>
+                {!bookingEnabled ? (
+                    <BookingUnavailableNotice className="mt-10" />
+                ) : (
+                    <>
+                        <div className="mb-10">
+                            <h1 className="text-4xl font-black tracking-tighter mb-2">
+                                Secure Your <span className="text-[#eb0028]">Seat</span>
+                            </h1>
+                        </div>
 
-                <form onSubmit={handleCreateOrder} className="bg-zinc-900 border border-zinc-800 p-8 rounded-sm space-y-6">
+                        <form onSubmit={handleCreateOrder} className="bg-zinc-900 border border-zinc-800 p-8 rounded-sm space-y-6">
                     {error && <div className="p-4 bg-red-950/30 border-l-4 border-[#eb0028] text-red-200 text-sm font-medium">{error}</div>}
 
                     <div className="space-y-4">
@@ -290,7 +296,9 @@ export default function UserFriendlyBooking() {
                     <button type="submit" disabled={loading} className="w-full bg-[#eb0028] hover:bg-[#c2001f] text-white font-bold py-5 mt-4 rounded-sm uppercase tracking-widest transition-colors disabled:opacity-50">
                         {loading ? 'Processing...' : 'Proceed to Payment'}
                     </button>
-                </form>
+                        </form>
+                    </>
+                )}
             </div>
 
             {/* Intermediate Processing / Redirecting Interface */}

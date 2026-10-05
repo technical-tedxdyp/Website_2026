@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { useBooking } from '../context/BookingContext';
 import { Evening_Seesion, Full_Day_Session, Morning_Session } from '@/lib/const';
 import PaymentRedirectLoader, { PaymentStep } from './PaymentRedirectLoader';
+import BookingUnavailableNotice from './BookingUnavailableNotice';
 
 const TICKET_TIERS = [
     { id: Morning_Session, name: 'Morning Session', price: '₹79', numericPrice: 79 },
@@ -59,6 +60,7 @@ type WindowWithRazorpay = Window & {
 export default function BookingDrawer() {
     const router = useRouter();
     const { isOpen, selectedTier, closeBooking, setSelectedTier } = useBooking();
+    const bookingEnabled = process.env.BOOKING_ENABLED !== 'false';
 
     const [formData, setFormData] = useState({
         name: '',
@@ -252,7 +254,7 @@ export default function BookingDrawer() {
 
     return (
         <>
-            <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+            {bookingEnabled && <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />}
 
             {/* Backdrop */}
             <div
@@ -274,7 +276,7 @@ export default function BookingDrawer() {
                             CHECKOUT
                         </span>
                         <h2 className="text-3xl font-black text-white tracking-tight">
-                            Book your seat
+                            {bookingEnabled ? 'Book your seat' : 'Bookings paused'}
                         </h2>
                     </div>
 
@@ -301,10 +303,13 @@ export default function BookingDrawer() {
                 </div>
 
                 {/* Body Content */}
-                <form
-                    onSubmit={handleSubmit}
-                    className="flex-1 flex flex-col justify-between overflow-y-auto p-6 md:p-8 space-y-6"
-                >
+                {!bookingEnabled ? (
+                    <BookingUnavailableNotice className="m-6 md:m-8" />
+                ) : (
+                    <form
+                        onSubmit={handleSubmit}
+                        className="flex-1 flex flex-col justify-between overflow-y-auto p-6 md:p-8 space-y-6"
+                    >
                     <div className="space-y-6">
                         {error && (
                             <div className="p-3 bg-red-100 border-2 border-[#EB0028] text-red-900 text-xs font-bold uppercase tracking-wider animate-slide-up-fade">
@@ -426,7 +431,8 @@ export default function BookingDrawer() {
                             )}
                         </button>
                     </div>
-                </form>
+                    </form>
+                )}
             </div>
 
             {/* Intermediate Processing / Redirecting Interface */}
